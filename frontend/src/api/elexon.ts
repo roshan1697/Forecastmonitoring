@@ -1,4 +1,4 @@
-import { ActualRecord, ForecastRecord } from '../types'
+import type { ActualRecord, ForecastRecord } from '../types'
 import { format } from 'date-fns'
 
 const BASE = '/bmrs-api'

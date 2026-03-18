@@ -59,7 +59,7 @@ export default function App() {
               <h1 className="font-display text-xl tracking-[0.05em] uppercase text-white leading-none">
                 Wind<span className="text-wind">Cast</span> Monitor
               </h1>
-              <p className="text-[9px] font-mono text-white/30 tracking-[0.1em] mt-0.5">
+              <p className="text-[9px] font-mono text-white/30 tracking-widest mt-0.5">
                 UK National Grid · Elexon BMRS · Jan 2024
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function App() {
       <main className="relative z-10 flex flex-1 w-full gap-5 px-4 py-5 mx-auto overflow-hidden max-w-screen-2xl md:px-6">
 
         {/* ── Sidebar ── */}
-        <aside className="flex flex-col flex-shrink-0 gap-4 w-72">
+        <aside className="flex flex-col gap-4 shrink-0 w-72">
           {/* Controls */}
           <div className="p-4 border bg-carbon-800/70 border-white/6 rounded-2xl backdrop-blur-sm shadow-inner-panel">
             <h2 className="text-[10px] font-display tracking-[0.2em] uppercase text-white/40 mb-4">
@@ -133,7 +133,7 @@ export default function App() {
             {/* Chart header */}
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="font-display text-base tracking-[0.1em] uppercase text-white/80">
+                <h2 className="text-base tracking-widest uppercase font-display text-white/80">
                   Generation vs Forecast
                 </h2>
                 <p className="text-[10px] font-mono text-white/30 mt-0.5">
@@ -150,12 +150,18 @@ export default function App() {
             </div>
 
             {/* States */}
+            
+              
             {loadState === 'idle' && (
+              
+                
               <EmptyState
+                
                 icon={<Wind size={32} className="text-wind/30" />}
                 title="Select a time range"
                 subtitle="Choose start & end dates and click Load Forecast Data to begin"
-              />
+                />
+                
             )}
 
             {loadState === 'loading' && (
@@ -170,20 +176,21 @@ export default function App() {
 
             {loadState === 'error' && (
               <EmptyState
-                icon={<AlertTriangle size={32} className="text-amber-400/60" />}
-                title="Could not load data"
-                subtitle={error ?? 'Check your network connection and try again'}
-                variant="error"
+              icon={<AlertTriangle size={32} className="text-amber-400/60" />}
+              title="Could not load data"
+              subtitle={error ?? 'Check your network connection and try again'}
+              variant="error"
               />
             )}
 
             {loadState === 'success' && chartData.length === 0 && (
               <EmptyState
-                icon={<Database size={32} className="text-white/20" />}
-                title="No data found"
-                subtitle="Try a different date range within January 2024"
+              icon={<Database size={32} className="text-white/20" />}
+              title="No data found"
+              subtitle="Try a different date range within January 2024"
               />
             )}
+          
           
             {loadState === 'success' && chartData.length > 0 && (
               <div className="h-[calc(100%-3rem)]" style={{ minHeight: 320 }}>

@@ -31,7 +31,7 @@ export const ControlPanel: React.FC<Props> = ({ onFetch, loadState }) => {
     return (
         <div className="flex flex-col gap-4">
             {/* Date range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                     <label className="flex items-center gap-1.5 text-[10px] font-display tracking-[0.15em] uppercase text-white/40">
                         <CalendarDays size={11} />
@@ -43,13 +43,7 @@ export const ControlPanel: React.FC<Props> = ({ onFetch, loadState }) => {
                         min={JAN_MIN}
                         max={JAN_MAX}
                         onChange={(e) => setStartStr(e.target.value)}
-                        className="
-              bg-carbon-700 border border-white/10 rounded-lg px-3 py-2
-              text-white/80 text-xs font-mono
-              focus:outline-none focus:border-actual/50 focus:ring-1 focus:ring-actual/20
-              transition-colors
-              [color-scheme:dark]
-            "
+                        className="px-3 py-2 font-mono text-xs transition-colors border rounded-lg bg-carbon-700 border-white/10 text-white/80 focus:outline-none focus:border-actual/50 focus:ring-1 focus:ring-actual/20 scheme-dark"
                     />
                 </div>
 
@@ -64,13 +58,7 @@ export const ControlPanel: React.FC<Props> = ({ onFetch, loadState }) => {
                         min={JAN_MIN}
                         max={JAN_MAX}
                         onChange={(e) => setEndStr(e.target.value)}
-                        className="
-              bg-carbon-700 border border-white/10 rounded-lg px-3 py-2
-              text-white/80 text-xs font-mono
-              focus:outline-none focus:border-actual/50 focus:ring-1 focus:ring-actual/20
-              transition-colors
-              [color-scheme:dark]
-            "
+                        className="px-3 py-2 font-mono text-xs transition-colors border rounded-lg  bg-carbon-700 border-white/10 text-white/80 focus:outline-none focus:border-actual/50 focus:ring-1 focus:ring-actual/20 scheme-dark"
                     />
                 </div>
             </div>

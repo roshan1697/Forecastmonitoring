@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             {payload.map((entry: any) => (
                 <div key={entry.dataKey} className="flex items-center gap-2 mb-1">
                     <span
-                        className="flex-shrink-0 w-2 h-2 rounded-full"
+                        className="w-2 h-2 rounded-full shrink-0"
                         style={{ backgroundColor: entry.color }}
                     />
                     <span className="text-white/70">{entry.name}:</span>
@@ -90,8 +90,8 @@ export const ForecastChart: React.FC<Props> = ({ data, horizonHours }) => {
     const tickFormatter = useMemo(() => getXTickFormatter(data), [data])
 
     return (
-        <div className="h-full w-100">
-            <ResponsiveContainer width='100%' height='100%' aspect={2}>
+        <div className="w-full h-full">
+            <ResponsiveContainer width='100%' height='100%' >
                 <ComposedChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
                     <defs>
                         <filter id="glow-actual">

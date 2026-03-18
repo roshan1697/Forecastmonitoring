@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
+
 /* ── Custom range slider ── */
 .horizon-slider {
   -webkit-appearance: none;

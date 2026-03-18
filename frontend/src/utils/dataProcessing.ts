@@ -14,6 +14,7 @@ export function buildChartData(
     horizonHours: number
 ): ChartPoint[] {
     // Group forecasts by startTime
+
     const forecastsByTarget = new Map<string, ForecastRecord[]>()
     for (const f of forecasts) {
         const key = normaliseTime(f.startTime)
@@ -36,27 +37,48 @@ export function buildChartData(
         //   return diff >= horizonMs && diff <= maxHorizonMs
         // })
 
-        let candidates: ForecastRecord[] = []
-        let currentHour = horizonHours
-        const maxAllowedHorizon = 48
+        // let candidates: ForecastRecord[] = []
+        // let currentHour = horizonHours
+        // const maxAllowedHorizon = 48
 
-        while (candidates.length === 0 && currentHour <= maxAllowedHorizon) {
-            const horizonMs = currentHour * 60 * 60 * 1000
-            const maxHorizonMs = (currentHour + 44) * 60 * 60 * 1000
-            candidates = (forecastsByTarget.get(targetKey) ?? []).filter((f) => {
-                const pubMs = new Date(f.publishTime).getTime()
+        // while (candidates.length === 0 && currentHour <= maxAllowedHorizon) {
+        //     const horizonMs = currentHour * 60 * 60 * 1000
+        //     const maxHorizonMs = (currentHour + 44) * 60 * 60 * 1000
+        //     candidates = (forecastsByTarget.get(targetKey) ?? []).filter((f) => {
+        //         const pubMs = new Date(f.publishTime).getTime()
+        //         // console.log(pubMs)
+        //         // console.log(targetMs)
+        //         // console.log(targetKey)
+        //         // console.log(f)
+        //         const diff = targetMs - pubMs
+        //         return  diff <= maxHorizonMs
+        //     })
+        //     if (candidates.length === 0) {
+        //         currentHour++
+        //     }
+        // }
 
-                const diff = targetMs - pubMs
-                return diff >= horizonMs && diff <= maxHorizonMs
-            })
-            if (candidates.length === 0) {
-                currentHour++
-            }
-        }
+        const allForecasts = forecastsByTarget.get(targetKey) ?? [];
 
+// 1. Sort by publish time (latest first)
+const sorted = allForecasts.sort((a, b) => 
+    new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime()
+);
 
+// 2. Find candidates. 
+// Since your data is mostly "future" forecasts published at 11:30, 
+// we allow a negative diff to capture forecasts for the morning.
+const candidates = sorted.filter((f) => {
+    const pubMs = new Date(f.publishTime).getTime();
+    const diff = targetMs - pubMs;
+    
+    // Logic: Is it within 48 hours of the event? 
+    // We allow negative diff because your 11:30 forecast covers the 09:00 period.
+    return Math.abs(diff) <= (48 * 60 * 60 * 1000);
+}).slice(0, 1); // Just take the single best match
 
-        console.log(candidates)
+        // console.log(currentHour)
+        // console.log(candidates)
 
         // Pick latest publishTime among candidates
         const best =
