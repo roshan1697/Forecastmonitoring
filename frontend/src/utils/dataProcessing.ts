@@ -8,6 +8,16 @@ import { format, parseISO } from 'date-fns'
  *     forecast.publishTime <= T - horizonHours
  *     (T - forecast.publishTime) <= 48 hours
  */
+function formatLabel(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleString("en-GB", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
+}
 export function buildChartData(
     actuals: ActualRecord[],
     forecasts: ForecastRecord[],
@@ -15,94 +25,38 @@ export function buildChartData(
 ): ChartPoint[] {
     // Group forecasts by startTime
 
-    const forecastsByTarget = new Map<string, ForecastRecord[]>()
-    for (const f of forecasts) {
-        const key = normaliseTime(f.startTime)
-        if (!forecastsByTarget.has(key)) forecastsByTarget.set(key, [])
-        forecastsByTarget.get(key)!.push(f)
-    }
-
-    const points: ChartPoint[] = []
-
-    for (const actual of actuals) {
-        const targetMs = new Date(actual.startTime).getTime()
-        const targetKey = normaliseTime(actual.startTime)
-
-        // const candidates = (forecastsByTarget.get(targetKey) ?? []).filter((f) => {
-        //   const pubMs = new Date(f.publishTime).getTime()
-        //   const horizonMs = horizonHours * 60 * 60 * 1000
-
-        //   const maxHorizonMs = 48 * 60 * 60 * 1000
-        //   const diff = targetMs - pubMs
-        //   return diff >= horizonMs && diff <= maxHorizonMs
-        // })
-
-        // let candidates: ForecastRecord[] = []
-        // let currentHour = horizonHours
-        // const maxAllowedHorizon = 48
-
-        // while (candidates.length === 0 && currentHour <= maxAllowedHorizon) {
-        //     const horizonMs = currentHour * 60 * 60 * 1000
-        //     const maxHorizonMs = (currentHour + 44) * 60 * 60 * 1000
-        //     candidates = (forecastsByTarget.get(targetKey) ?? []).filter((f) => {
-        //         const pubMs = new Date(f.publishTime).getTime()
-        //         // console.log(pubMs)
-        //         // console.log(targetMs)
-        //         // console.log(targetKey)
-        //         // console.log(f)
-        //         const diff = targetMs - pubMs
-        //         return  diff <= maxHorizonMs
-        //     })
-        //     if (candidates.length === 0) {
-        //         currentHour++
-        //     }
-        // }
-
-        const allForecasts = forecastsByTarget.get(targetKey) ?? [];
-
-// 1. Sort by publish time (latest first)
-const sorted = allForecasts.sort((a, b) => 
-    new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime()
-);
-
-// 2. Find candidates. 
-// Since your data is mostly "future" forecasts published at 11:30, 
-// we allow a negative diff to capture forecasts for the morning.
-const candidates = sorted.filter((f) => {
-    const pubMs = new Date(f.publishTime).getTime();
-    const diff = targetMs - pubMs;
     
-    // Logic: Is it within 48 hours of the event? 
-    // We allow negative diff because your 11:30 forecast covers the 09:00 period.
-    return Math.abs(diff) <= (48 * 60 * 60 * 1000);
-}).slice(0, 1); // Just take the single best match
+function processWindData(
+  actual: ActualRecord[],
+  forecast: ForecastRecord[]
+): ChartPoint[] {
+  const actualMap = new Map<number, number>(
+    actual.map((a) => [new Date(a.startTime).getTime(), a.generation])
+  );
 
-        // console.log(currentHour)
-        // console.log(candidates)
+  const forecastMap = new Map<number, number>(
+    forecast.map((f) => [new Date(f.startTime).getTime(), f.generation])
+  );
 
-        // Pick latest publishTime among candidates
-        const best =
-            candidates.length > 0
-                ? candidates.reduce((a, b) =>
-                    new Date(a.publishTime) > new Date(b.publishTime) ? a : b
-                )
-                : null
+  const allTimestamps = new Set<number>([
+    ...actualMap.keys(),
+    ...forecastMap.keys(),
+  ]);
 
-        const horizonHrs = best
-            ? (targetMs - new Date(best.publishTime).getTime()) / 3_600_000
-            : undefined
+  return [...allTimestamps]
+    .sort((a, b) => a - b)
+    .map((timestamp) => ({
+      timestamp,
+      label: formatLabel(new Date(timestamp).toISOString()),
+      actual: actualMap.get(timestamp) ?? null,
+      forecast: forecastMap.get(timestamp) ?? null,
+    }));
+}
 
-        points.push({
-            timestamp: targetMs,
-            label: format(new Date(actual.startTime), 'dd MMM HH:mm'),
-            actual: actual.generation ?? null,
-            forecast: best ? best.generation : null,
-            forecastPublishTime: best?.publishTime,
-            horizonHours: horizonHrs !== undefined ? Math.round(horizonHrs * 10) / 10 : undefined,
-        })
-    }
 
-    return points.sort((a, b) => a.timestamp - b.timestamp)
+const aligned = processWindData(actuals, forecasts);
+console.log(aligned);
+    return aligned
 }
 
 function normaliseTime(iso: string): string {
